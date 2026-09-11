@@ -1,0 +1,2847 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ELIONIX — Engineering Project V0.4</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#f2f4f1;
+  --paper:#fafbf9;
+
+  /* CONTRAST SYSTEM */
+  --ink:#102018;
+  --secondary:#46534d;
+  --muted:#5f6c66;
+
+  --technical:#0b5d3b;
+  --green:#0a7a4b;
+  --green-dark:#075b39;
+
+  --blue:#12304a;
+  --blue-soft:#294d63;
+
+  --orange:#a96221;
+  --red:#a63f36;
+
+  --line:#d2dad5;
+
+  /* Floating technical labels */
+  --label-bg:rgba(255,255,255,.84);
+  --label-border:rgba(16,32,24,.13);
+  --label-shadow:0 5px 18px rgba(16,32,24,.10);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  display:block;
+}
+
+/* =========================================================
+   GLOBAL TYPOGRAPHY
+   ========================================================= */
+
+h1,
+h2,
+h3,
+p{
+  margin:0;
+}
+
+h1,
+h2,
+h3{
+  color:var(--ink);
+  letter-spacing:-.035em;
+}
+
+h1{
+  font-weight:800;
+}
+
+h2{
+  font-weight:750;
+}
+
+h3{
+  font-weight:700;
+}
+
+p{
+  color:var(--secondary);
+}
+
+.mono{
+  font-family:"DM Mono",monospace;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar{
+  position:fixed;
+  top:22px;
+  left:28px;
+  right:28px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  z-index:20;
+  pointer-events:none;
+}
+
+.brand{
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.18em;
+  color:var(--ink);
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.95),
+    0 2px 8px rgba(16,32,24,.08);
+}
+
+.project-tag{
+  font-family:"DM Mono",monospace;
+  font-size:10px;
+  letter-spacing:.12em;
+  color:var(--technical);
+
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(16,32,24,.10);
+  border-radius:999px;
+  padding:8px 11px;
+
+  box-shadow:0 4px 16px rgba(16,32,24,.07);
+}
+
+/* =========================================================
+   CHAPTER INDICATOR
+   ========================================================= */
+
+.chapter{
+  position:fixed;
+  left:28px;
+  top:50%;
+  transform:translateY(-50%);
+
+  z-index:20;
+  pointer-events:none;
+
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.chapter span{
+  width:3px;
+  height:18px;
+  border-radius:4px;
+  background:rgba(16,32,24,.16);
+  transition:.35s ease;
+}
+
+.chapter span.active{
+  height:34px;
+  background:var(--green);
+  box-shadow:0 0 12px rgba(10,122,75,.22);
+}
+
+/* =========================================================
+   SCENE LABEL SYSTEM
+   ========================================================= */
+
+.scene-label{
+  position:fixed;
+  z-index:12;
+  pointer-events:none;
+
+  padding:7px 10px;
+
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  line-height:1.35;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+
+  color:var(--technical);
+
+  background:var(--label-bg);
+  border:1px solid var(--label-border);
+  border-radius:7px;
+
+  box-shadow:var(--label-shadow);
+
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.95);
+}
+
+/* When label is positioned over a darker object */
+.scene-label.dark-surface{
+  color:#fff;
+  background:rgba(11,93,59,.90);
+  border-color:rgba(255,255,255,.22);
+
+  text-shadow:
+    0 1px 3px rgba(0,0,0,.35);
+
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.16);
+}
+
+/* =========================================================
+   MAIN SECTION SYSTEM
+   ========================================================= */
+
+.section{
+  position:fixed;
+  z-index:10;
+  pointer-events:none;
+
+  max-width:620px;
+
+  opacity:0;
+  transform:translateY(18px);
+
+  transition:
+    opacity .45s ease,
+    transform .55s cubic-bezier(.22,.61,.36,1);
+}
+
+.section.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* subtle readable surface — NOT a black box */
+.section-inner{
+  display:inline-block;
+
+  padding:15px 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.88),
+      rgba(255,255,255,.62)
+    );
+
+  border:1px solid rgba(16,32,24,.08);
+  border-radius:13px;
+
+  box-shadow:
+    0 12px 35px rgba(16,32,24,.08);
+
+  backdrop-filter:blur(9px);
+  -webkit-backdrop-filter:blur(9px);
+}
+
+/* =========================================================
+   KICKERS / TECHNICAL LABELS
+   ========================================================= */
+
+.kicker{
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  margin-bottom:11px;
+
+  font-family:"DM Mono",monospace;
+  font-size:10px;
+  line-height:1.3;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+
+  color:var(--technical);
+
+  font-weight:500;
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.95);
+}
+
+.kicker::before{
+  content:"";
+  width:20px;
+  height:1px;
+  background:var(--green);
+}
+
+/* =========================================================
+   HEADINGS
+   ========================================================= */
+
+.hero-title{
+  font-size:clamp(42px,6vw,82px);
+  line-height:.95;
+  color:var(--ink);
+  font-weight:800;
+
+  text-shadow:
+    0 2px 0 rgba(255,255,255,.85),
+    0 8px 25px rgba(16,32,24,.08);
+}
+
+.section-title{
+  font-size:clamp(30px,4vw,58px);
+  line-height:1.02;
+  color:var(--ink);
+  font-weight:750;
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.9),
+    0 5px 18px rgba(16,32,24,.06);
+}
+
+.section-copy{
+  margin-top:14px;
+
+  max-width:570px;
+
+  font-size:15px;
+  line-height:1.65;
+
+  color:var(--secondary);
+  font-weight:500;
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.85);
+}
+
+/* =========================================================
+   TECHNICAL TEXT
+   ========================================================= */
+
+.tech{
+  color:var(--technical);
+  font-family:"DM Mono",monospace;
+  font-weight:500;
+}
+
+.accent{
+  color:var(--green);
+  font-weight:700;
+}
+
+.data-number{
+  color:var(--blue);
+  font-family:"DM Mono",monospace;
+  font-weight:500;
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.95);
+}
+
+/* =========================================================
+   MEASUREMENT ROWS
+   ========================================================= */
+
+.measurements{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+
+  margin-top:17px;
+}
+
+.measurement{
+  padding:9px 11px;
+
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(16,32,24,.09);
+  border-radius:8px;
+
+  box-shadow:
+    0 5px 16px rgba(16,32,24,.06);
+
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+.measurement .name{
+  display:block;
+
+  font-family:"DM Mono",monospace;
+  font-size:8px;
+  letter-spacing:.1em;
+
+  color:var(--secondary);
+  font-weight:500;
+}
+
+.measurement .value{
+  display:block;
+
+  margin-top:4px;
+
+  font-family:"DM Mono",monospace;
+  font-size:14px;
+
+  color:var(--blue);
+  font-weight:500;
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+
+  padding:7px 10px;
+
+  border-radius:999px;
+
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(16,32,24,.09);
+
+  color:var(--technical);
+
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+
+  box-shadow:
+    0 4px 14px rgba(16,32,24,.07);
+}
+
+.status::before{
+  content:"";
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:currentColor;
+}
+
+/* =========================================================
+   PROTOTYPE / SERIAL MONITOR
+   ========================================================= */
+
+.serial{
+  margin-top:18px;
+
+  width:min(570px,calc(100vw - 70px));
+
+  padding:15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.94),
+      rgba(247,250,248,.90)
+    );
+
+  border:1px solid rgba(16,32,24,.12);
+  border-radius:11px;
+
+  box-shadow:
+    0 14px 35px rgba(16,32,24,.10);
+
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+.serial-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding-bottom:10px;
+  margin-bottom:10px;
+
+  border-bottom:1px solid var(--line);
+
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  letter-spacing:.09em;
+
+  color:var(--secondary);
+}
+
+.serial-body{
+  font-family:"DM Mono",monospace;
+  font-size:11px;
+  line-height:1.8;
+
+  color:#183b2a;
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.9);
+}
+
+.serial-body .key{
+  color:var(--secondary);
+}
+
+.serial-body .number{
+  color:var(--blue);
+}
+
+.serial-body .ok{
+  color:var(--technical);
+  font-weight:500;
+}
+
+.serial-body .warn{
+  color:var(--orange);
+  font-weight:500;
+}
+
+.serial-body .danger{
+  color:var(--red);
+  font-weight:500;
+}
+
+/* =========================================================
+   BUILT / DEVELOPMENT / VISION
+   ========================================================= */
+
+.state-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  margin-top:18px;
+}
+
+.state-row{
+  display:grid;
+  grid-template-columns:115px 1fr;
+  gap:13px;
+
+  padding:10px 0;
+
+  border-bottom:1px solid rgba(16,32,24,.10);
+}
+
+.state{
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  font-weight:500;
+}
+
+.state.built{
+  color:var(--technical);
+}
+
+.state.dev{
+  color:var(--orange);
+}
+
+.state.vision{
+  color:var(--blue);
+}
+
+.state-description{
+  color:var(--secondary);
+  font-size:12px;
+  line-height:1.5;
+  font-weight:500;
+}
+
+/* =========================================================
+   DATA TABLE
+   ========================================================= */
+
+.data-table{
+  margin-top:18px;
+
+  border-top:1px solid rgba(16,32,24,.12);
+  border-bottom:1px solid rgba(16,32,24,.12);
+}
+
+.data-row{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+
+  padding:9px 0;
+
+  border-bottom:1px solid rgba(16,32,24,.07);
+}
+
+.data-row:last-child{
+  border-bottom:0;
+}
+
+.data-label{
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  color:var(--secondary);
+  letter-spacing:.06em;
+}
+
+.data-value{
+  text-align:right;
+
+  font-family:"DM Mono",monospace;
+  font-size:10px;
+  font-weight:500;
+
+  color:var(--blue);
+}
+
+/* =========================================================
+   ML FLOW
+   ========================================================= */
+
+.flow{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+
+  margin-top:19px;
+}
+
+.flow-step{
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  letter-spacing:.06em;
+
+  color:var(--technical);
+  font-weight:500;
+
+  padding:7px 9px;
+
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(16,32,24,.09);
+  border-radius:7px;
+
+  box-shadow:0 4px 12px rgba(16,32,24,.05);
+}
+
+.flow-arrow{
+  color:var(--secondary);
+  font-size:11px;
+}
+
+/* =========================================================
+   ROADMAP
+   ========================================================= */
+
+.roadmap{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+
+  margin-top:18px;
+}
+
+.roadmap-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.roadmap-dot{
+  flex:none;
+
+  width:7px;
+  height:7px;
+  border-radius:50%;
+
+  background:var(--green);
+  box-shadow:0 0 0 4px rgba(10,122,75,.10);
+}
+
+.roadmap-dot.future{
+  background:var(--blue);
+  box-shadow:0 0 0 4px rgba(18,48,74,.09);
+}
+
+.roadmap-text{
+  font-size:12px;
+  color:var(--secondary);
+  font-weight:500;
+}
+
+.roadmap-text strong{
+  color:var(--ink);
+  font-weight:700;
+}
+
+/* =========================================================
+   STARTUP / INDUSTRIAL
+   ========================================================= */
+
+.route{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+
+  margin-top:20px;
+}
+
+.route-item{
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  letter-spacing:.08em;
+
+  color:var(--technical);
+  font-weight:500;
+
+  padding:8px 10px;
+
+  background:rgba(255,255,255,.80);
+  border:1px solid rgba(16,32,24,.09);
+  border-radius:7px;
+
+  box-shadow:0 4px 13px rgba(16,32,24,.05);
+}
+
+.route-arrow{
+  color:var(--secondary);
+}
+
+/* =========================================================
+   FINAL CTA
+   ========================================================= */
+
+.final-title{
+  font-size:clamp(38px,5vw,72px);
+  line-height:.98;
+
+  color:var(--ink);
+  font-weight:800;
+
+  text-shadow:
+    0 2px 0 rgba(255,255,255,.9),
+    0 10px 30px rgba(16,32,24,.09);
+}
+
+.final-sub{
+  margin-top:15px;
+
+  color:var(--secondary);
+  font-size:14px;
+  line-height:1.6;
+  font-weight:500;
+}
+
+.internship{
+  display:inline-block;
+
+  margin-top:18px;
+
+  padding:11px 14px;
+
+  color:#fff;
+
+  background:var(--green);
+
+  border-radius:8px;
+
+  font-family:"DM Mono",monospace;
+  font-size:9px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-weight:500;
+
+  box-shadow:
+    0 8px 20px rgba(10,122,75,.20);
+
+  text-shadow:
+    0 1px 3px rgba(0,0,0,.20);
+}
+
+/* =========================================================
+   SECTION POSITIONS
+   ========================================================= */
+
+#s1{
+  left:9vw;
+  top:30vh;
+}
+
+#s2{
+  right:8vw;
+  top:29vh;
+}
+
+#s3{
+  left:8vw;
+  top:28vh;
+}
+
+#s4{
+  right:7vw;
+  top:22vh;
+}
+
+#s5{
+  left:8vw;
+  top:25vh;
+}
+
+#s6{
+  right:8vw;
+  top:27vh;
+}
+
+#s7{
+  left:8vw;
+  top:28vh;
+}
+
+#s8{
+  right:7vw;
+  top:26vh;
+}
+
+#s9{
+  left:8vw;
+  top:25vh;
+}
+
+#s10{
+  right:8vw;
+  top:26vh;
+}
+
+#s11{
+  left:8vw;
+  top:29vh;
+}
+
+/* =========================================================
+   SCROLL HINT
+   ========================================================= */
+
+.scroll-hint{
+  position:fixed;
+  bottom:25px;
+  left:50%;
+  transform:translateX(-50%);
+
+  z-index:20;
+  pointer-events:none;
+
+  font-family:"DM Mono",monospace;
+  font-size:8px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+
+  color:var(--secondary);
+
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(16,32,24,.08);
+  border-radius:999px;
+
+  padding:7px 11px;
+
+  box-shadow:
+    0 4px 14px rgba(16,32,24,.06);
+
+  backdrop-filter:blur(7px);
+}
+
+/* =========================================================
+   HIGH CONTRAST MODE
+   Used automatically when camera enters darker areas.
+   ========================================================= */
+
+body.high-contrast .section-inner{
+  background:rgba(255,255,255,.94);
+
+  box-shadow:
+    0 14px 38px rgba(0,0,0,.13);
+}
+
+body.high-contrast .section-title,
+body.high-contrast .hero-title,
+body.high-contrast .final-title{
+  color:#102018;
+
+  text-shadow:
+    0 2px 0 rgba(255,255,255,1),
+    0 6px 20px rgba(255,255,255,.55);
+}
+
+body.high-contrast .section-copy,
+body.high-contrast p{
+  color:#38463f;
+}
+
+body.high-contrast .kicker{
+  color:#075b39;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:800px){
+
+  .topbar{
+    left:17px;
+    right:17px;
+    top:16px;
+  }
+
+  .brand{
+    font-size:11px;
+  }
+
+  .project-tag{
+    font-size:8px;
+    padding:7px 9px;
+  }
+
+  .chapter{
+    left:15px;
+  }
+
+  .section{
+    left:20px !important;
+    right:20px !important;
+    top:20vh !important;
+
+    max-width:none;
+  }
+
+  .section-inner{
+    max-width:100%;
+    padding:13px 15px;
+  }
+
+  .hero-title{
+    font-size:42px;
+  }
+
+  .section-title{
+    font-size:34px;
+  }
+
+  .section-copy{
+    font-size:13px;
+  }
+
+  .serial{
+    width:100%;
+  }
+
+  .measurement{
+    padding:7px 9px;
+  }
+
+  .measurement .value{
+    font-size:12px;
+  }
+
+  .scroll-hint{
+    bottom:15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="scene"></canvas>
+
+<!-- =======================================================
+     TOP BAR
+======================================================= -->
+
+<div class="topbar">
+  <div class="brand">ELIONIX</div>
+
+  <div class="project-tag">
+    ENGINEERING PROJECT / V0.4
+  </div>
+</div>
+
+<!-- =======================================================
+     CHAPTER INDICATOR
+======================================================= -->
+
+<div class="chapter" id="chapter">
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<!-- =======================================================
+     01 — PROJECT
+======================================================= -->
+
+<section class="section" id="s1">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      01 / PROJECT
+    </div>
+
+    <h1 class="hero-title">
+      ELIONIX
+    </h1>
+
+    <p class="section-copy">
+      Intelligent Monitoring &amp; Diagnostic System
+      for Photovoltaic Installations.
+    </p>
+
+    <div class="measurements">
+
+      <div class="measurement">
+        <span class="name">PROJECT</span>
+        <span class="value">STARTUP / PFE</span>
+      </div>
+
+      <div class="measurement">
+        <span class="name">FIELD</span>
+        <span class="value">RENEWABLE ENERGY</span>
+      </div>
+
+      <div class="measurement">
+        <span class="name">UNIVERSITY</span>
+        <span class="value">UMMTO</span>
+      </div>
+<div class="measurement">
+        <span class="name">FOUNDER</span>
+        <span class="value">Laouedj Farida</span>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     02 — PROBLEM
+======================================================= -->
+
+<section class="section" id="s2">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      02 / PROBLEM
+    </div>
+
+    <h2 class="section-title">
+      A PV system is<br>
+      never just a number.
+    </h2>
+
+    <p class="section-copy">
+      Temperature, irradiance, voltage, current and power
+      describe the operating condition of a photovoltaic
+      installation. The challenge is understanding when
+      these measurements indicate abnormal behaviour.
+    </p>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     03 — SOLUTION
+======================================================= -->
+
+<section class="section" id="s3">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      03 / SYSTEM
+    </div>
+
+    <h2 class="section-title">
+      From physical<br>
+      measurement to diagnosis.
+    </h2>
+
+    <div class="flow">
+
+      <div class="flow-step">MEASURE</div>
+      <div class="flow-arrow">→</div>
+
+      <div class="flow-step">ACQUIRE</div>
+      <div class="flow-arrow">→</div>
+
+      <div class="flow-step">STORE</div>
+      <div class="flow-arrow">→</div>
+
+      <div class="flow-step">ANALYZE</div>
+      <div class="flow-arrow">→</div>
+
+      <div class="flow-step">DIAGNOSE</div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     04 — PROTOTYPE
+======================================================= -->
+
+<section class="section" id="s4">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      04 / CURRENT PROTOTYPE
+    </div>
+
+    <h2 class="section-title">
+      This is where<br>
+      we are now.
+    </h2>
+
+    <p class="section-copy">
+      ELIONIX V0.4 currently demonstrates temperature
+      acquisition with a DS18B20 sensor and ESP32-based
+      monitoring.
+    </p>
+
+    <div class="serial">
+
+      <div class="serial-head">
+        <span>ELIONIX / SERIAL MONITOR</span>
+        <span>GPIO 27</span>
+      </div>
+
+      <div class="serial-body">
+
+        <div>
+          <span class="key">sensor:</span>
+          DS18B20
+        </div>
+
+        <div>
+          <span class="key">temperature:</span>
+          <span class="number" id="serialTemp">34.8 °C</span>
+        </div>
+
+        <div>
+          <span class="key">status:</span>
+          <span class="ok" id="serialStatus">
+            NORMAL
+          </span>
+        </div>
+
+        <div>
+          <span class="key">diagnosis:</span>
+          <span class="ok" id="serialDiagnosis">
+            NORMAL TEMPERATURE
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     05 — ACHIEVEMENTS
+======================================================= -->
+
+<section class="section" id="s5">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      05 / ACHIEVEMENTS
+    </div>
+
+    <h2 class="section-title">
+      What has<br>
+      actually been built.
+    </h2>
+
+    <div class="state-list">
+
+      <div class="state-row">
+        <div class="state built">BUILT</div>
+        <div class="state-description">
+          ESP32 integration
+        </div>
+      </div>
+
+      <div class="state-row">
+        <div class="state built">BUILT</div>
+        <div class="state-description">
+          DS18B20 temperature acquisition
+        </div>
+      </div>
+
+      <div class="state-row">
+        <div class="state built">BUILT</div>
+        <div class="state-description">
+          Real-time monitoring
+        </div>
+      </div>
+
+      <div class="state-row">
+        <div class="state built">BUILT</div>
+        <div class="state-description">
+          Basic diagnostic states
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     06 — PROJECT STATUS
+======================================================= -->
+
+<section class="section" id="s6">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      06 / PROJECT STATUS
+    </div>
+
+    <h2 class="section-title">
+      Not everything<br>
+      is built yet.
+    </h2>
+
+    <div class="state-list">
+
+      <div class="state-row">
+        <div class="state built">BUILT</div>
+        <div class="state-description">
+          Temperature monitoring &amp; basic diagnosis
+        </div>
+      </div>
+
+      <div class="state-row">
+        <div class="state dev">IN DEV.</div>
+        <div class="state-description">
+          Multi-parameter acquisition &amp; data storage
+        </div>
+      </div>
+
+      <div class="state-row">
+        <div class="state vision">VISION</div>
+        <div class="state-description">
+          Machine-learning-based intelligent diagnosis
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     07 — DATA
+======================================================= -->
+
+<section class="section" id="s7">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      07 / DATA ACQUISITION
+    </div>
+
+    <h2 class="section-title">
+      Measurements become data.
+    </h2>
+
+    <p class="section-copy">
+      Once the sensing layer expands, ELIONIX can organize
+      operating parameters into structured historical data.
+    </p>
+
+    <div class="data-table">
+
+      <div class="data-row">
+        <span class="data-label">TEMPERATURE</span>
+        <span class="data-value">38 °C</span>
+      </div>
+
+      <div class="data-row">
+        <span class="data-label">IRRADIANCE</span>
+        <span class="data-value">870 W/m²</span>
+      </div>
+
+      <div class="data-row">
+        <span class="data-label">VOLTAGE</span>
+        <span class="data-value">210 V</span>
+      </div>
+
+      <div class="data-row">
+        <span class="data-label">CURRENT</span>
+        <span class="data-value">3 A</span>
+      </div>
+
+      <div class="data-row">
+        <span class="data-label">POWER</span>
+        <span class="data-value">630 W</span>
+      </div>
+
+      <div class="data-row">
+        <span class="data-label">TIME</span>
+        <span class="data-value">ILLUSTRATIVE</span>
+      </div>
+
+    </div>
+
+    <p class="mono" style="
+      margin-top:10px;
+      font-size:8px;
+      color:#5f6c66;
+    ">
+      ILLUSTRATIVE DATA — NOT LEGHROUS MEASUREMENTS
+    </p>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     08 — INTELLIGENCE
+======================================================= -->
+
+<section class="section" id="s8">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      08 / INTELLIGENCE
+    </div>
+
+    <h2 class="section-title">
+      Data is only<br>
+      the beginning.
+    </h2>
+
+    <div class="flow">
+
+      <div class="flow-step">DATA</div>
+      <div class="flow-arrow">→</div>
+
+      <div class="flow-step">PATTERNS</div>
+      <div class="flow-arrow">→</div>
+
+      <div class="flow-step">ANOMALIES</div>
+      <div class="flow-arrow">→</div>
+
+      <div class="flow-step">DIAGNOSIS</div>
+
+    </div>
+
+    <p class="section-copy">
+      Machine learning is envisioned as a future intelligent
+      layer to support identification of abnormal photovoltaic
+      behaviour from historical operating data.
+    </p>
+
+    <div class="status">
+      MACHINE LEARNING / FUTURE LAYER
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     09 — ROADMAP
+======================================================= -->
+
+<section class="section" id="s9">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      09 / ROADMAP
+    </div>
+
+    <h2 class="section-title">
+      From V0.4<br>
+      to intelligent diagnosis.
+    </h2>
+
+    <div class="roadmap">
+
+      <div class="roadmap-row">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-text">
+          <strong>NOW</strong> — V0.4 prototype
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-text">
+          <strong>NEXT</strong> — Multi-parameter acquisition
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-text">
+          <strong>NEXT</strong> — Database &amp; historical data
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-dot future"></div>
+        <div class="roadmap-text">
+          <strong>VISION</strong> — Advanced analysis
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-dot future"></div>
+        <div class="roadmap-text">
+          <strong>VISION</strong> — Intelligent diagnosis
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-dot future"></div>
+        <div class="roadmap-text">
+          <strong>VALIDATION</strong> — Real industrial PV environment
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     10 — STARTUP
+======================================================= -->
+
+<section class="section" id="s10">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      10 / STARTUP PERSPECTIVE
+    </div>
+
+    <h2 class="section-title">
+      An engineering problem.<br>
+      A scalable direction.
+    </h2>
+
+    <div class="state-list">
+
+      <div class="state-row">
+        <div class="state built">PROBLEM</div>
+        <div class="state-description">
+          Detect abnormal PV behaviour earlier.
+        </div>
+      </div>
+
+      <div class="state-row">
+        <div class="state built">VALUE</div>
+        <div class="state-description">
+          Turn operating measurements into useful diagnostic information.
+        </div>
+      </div>
+
+      <div class="state-row">
+        <div class="state vision">AMBITION</div>
+        <div class="state-description">
+          Build an intelligent monitoring and diagnostic platform
+          for photovoltaic installations.
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     11 — INDUSTRIAL CONNECTION
+======================================================= -->
+
+<section class="section" id="s11">
+
+  <div class="section-inner">
+
+    <div class="kicker">
+      11 / INDUSTRIAL CONNECTION
+    </div>
+
+    <h2 class="final-title">
+      From prototype<br>
+      to industry.
+    </h2>
+
+    <p class="final-sub">
+      The next step is to understand how photovoltaic systems
+      behave under real operating conditions and connect that
+      knowledge to the development of ELIONIX.
+    </p>
+
+    <div class="route">
+
+      <div class="route-item">UNIVERSITY</div>
+      <div class="route-arrow">→</div>
+
+      <div class="route-item">PROTOTYPE</div>
+      <div class="route-arrow">→</div>
+
+      <div class="route-item">REAL PV</div>
+      <div class="route-arrow">→</div>
+
+      <div class="route-item">VALIDATION</div>
+
+    </div>
+
+    <div class="internship">
+      SEEKING AN INTERNSHIP OPPORTUNITY AT THE LEGHROUS PHOTOVOLTAIC POWER PLANT
+    </div>
+
+  </div>
+
+</section>
+
+<div class="scroll-hint">
+  SCROLL TO EXPLORE
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+
+/* =========================================================
+   THREE.JS SETUP
+   ========================================================= */
+
+const canvas = document.getElementById("scene");
+
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias:true,
+  alpha:true
+});
+
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio,2)
+);
+
+renderer.setSize(
+  window.innerWidth,
+  window.innerHeight
+);
+
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+
+scene.background = new THREE.Color("#f2f4f1");
+
+const camera = new THREE.PerspectiveCamera(
+  43,
+  window.innerWidth/window.innerHeight,
+  .1,
+  300
+);
+
+camera.position.set(0,7,38);
+
+const ambient = new THREE.HemisphereLight(
+  0xffffff,
+  0xdde5df,
+  2.5
+);
+
+scene.add(ambient);
+
+const sun = new THREE.DirectionalLight(
+  0xffffff,
+  3
+);
+
+sun.position.set(
+  20,
+  35,
+  20
+);
+
+sun.castShadow = true;
+
+scene.add(sun);
+
+/* =========================================================
+   MATERIALS
+   ========================================================= */
+
+const mat = {
+  ground:new THREE.MeshStandardMaterial({
+    color:"#e6ebe7",
+    roughness:.86,
+    metalness:.05
+  }),
+
+  panel:new THREE.MeshStandardMaterial({
+    color:"#173b4d",
+    roughness:.36,
+    metalness:.25
+  }),
+
+  frame:new THREE.MeshStandardMaterial({
+    color:"#c8d0cc",
+    roughness:.45,
+    metalness:.5
+  }),
+
+  green:new THREE.MeshStandardMaterial({
+    color:"#0a7a4b",
+    roughness:.4,
+    metalness:.15
+  }),
+
+  board:new THREE.MeshStandardMaterial({
+    color:"#143d31",
+    roughness:.55,
+    metalness:.1
+  }),
+
+  copper:new THREE.MeshStandardMaterial({
+    color:"#b06c32",
+    roughness:.45,
+    metalness:.35
+  }),
+
+  white:new THREE.MeshStandardMaterial({
+    color:"#f9faf8",
+    roughness:.5,
+    metalness:.05
+  }),
+
+  blue:new THREE.MeshStandardMaterial({
+    color:"#315c72",
+    roughness:.4,
+    metalness:.2
+  })
+};
+
+/* =========================================================
+   GROUND
+   ========================================================= */
+
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(140,140),
+  mat.ground
+);
+
+ground.rotation.x = -Math.PI/2;
+ground.position.y = 0;
+
+ground.receiveShadow = true;
+
+scene.add(ground);
+
+/* =========================================================
+   ENGINEERING GRID
+   ========================================================= */
+
+const grid = new THREE.GridHelper(
+  120,
+  80,
+  0xc6d0ca,
+  0xdce3df
+);
+
+grid.position.y=.012;
+
+scene.add(grid);
+
+/* =========================================================
+   PV PANEL FUNCTION
+   ========================================================= */
+
+function createPanel(){
+
+  const group = new THREE.Group();
+
+  const frame = new THREE.Mesh(
+    new THREE.BoxGeometry(5.4,.12,3.2),
+    mat.frame
+  );
+
+  frame.castShadow=true;
+
+  group.add(frame);
+
+  const surface = new THREE.Mesh(
+    new THREE.BoxGeometry(5.05,.07,2.85),
+    mat.panel
+  );
+
+  surface.position.y=.1;
+
+  group.add(surface);
+
+  /* Cell lines */
+
+  const lineMat = new THREE.LineBasicMaterial({
+    color:0x88a4af,
+    transparent:true,
+    opacity:.38
+  });
+
+  for(let x=-2.0;x<=2.0;x+=.5){
+
+    const points=[
+      new THREE.Vector3(x,.15,-1.4),
+      new THREE.Vector3(x,.15,1.4)
+    ];
+
+    const geo=new THREE.BufferGeometry()
+      .setFromPoints(points);
+
+    const line=new THREE.Line(
+      geo,
+      lineMat
+    );
+
+    group.add(line);
+  }
+
+  for(let z=-1.2;z<=1.2;z+=.48){
+
+    const points=[
+      new THREE.Vector3(-2.5,.15,z),
+      new THREE.Vector3(2.5,.15,z)
+    ];
+
+    const geo=new THREE.BufferGeometry()
+      .setFromPoints(points);
+
+    const line=new THREE.Line(
+      geo,
+      lineMat
+    );
+
+    group.add(line);
+  }
+
+  return group;
+}
+
+/* =========================================================
+   PV FIELD — 20 PANELS
+========================================================= */
+
+const pvField = new THREE.Group();
+
+for(let x=0;x<4;x++){
+
+  for(let z=0;z<5;z++){
+
+    const p=createPanel();
+
+    p.position.set(
+      (x-1.5)*6.3,
+      1.25,
+      z*4.5
+    );
+
+    p.rotation.x=-0.18;
+
+    pvField.add(p);
+  }
+}
+
+pvField.position.z=-18;
+
+scene.add(pvField);
+
+/* =========================================================
+   HERO PANEL
+========================================================= */
+
+const hero = createPanel();
+
+hero.position.set(
+  0,
+  4.4,
+  -8
+);
+
+hero.rotation.x=-0.12;
+
+hero.scale.setScalar(1.12);
+
+scene.add(hero);
+
+/* =========================================================
+   SENSOR NODE
+========================================================= */
+
+function createSensor(color){
+
+  const g=new THREE.Group();
+
+  const body=new THREE.Mesh(
+    new THREE.CylinderGeometry(
+      .12,.12,.25,24
+    ),
+    new THREE.MeshStandardMaterial({
+      color,
+      roughness:.35,
+      metalness:.25
+    })
+  );
+
+  body.rotation.z=Math.PI/2;
+
+  g.add(body);
+
+  const tip=new THREE.Mesh(
+    new THREE.SphereGeometry(.08,16,16),
+    new THREE.MeshStandardMaterial({
+      color:"#f4f7f5",
+      roughness:.25,
+      metalness:.1
+    })
+  );
+
+  tip.position.x=.14;
+
+  g.add(tip);
+
+  return g;
+}
+
+const tempSensor=createSensor("#0a7a4b");
+const irradianceSensor=createSensor("#a96221");
+const electricalSensor=createSensor("#315c72");
+
+tempSensor.position.set(-1.8,4.65,-8);
+irradianceSensor.position.set(0,4.72,-8);
+electricalSensor.position.set(1.8,4.65,-8);
+
+scene.add(
+  tempSensor,
+  irradianceSensor,
+  electricalSensor
+);
+
+/* =========================================================
+   SENSOR LABELS
+========================================================= */
+
+function createWorldLabel(text){
+
+  const el=document.createElement("div");
+
+  el.className="scene-label";
+  el.textContent=text;
+
+  document.body.appendChild(el);
+
+  return el;
+}
+
+const labelTemp=createWorldLabel("DS18B20 / TEMPERATURE");
+const labelIrr=createWorldLabel("IRRADIANCE");
+const labelElec=createWorldLabel("V / I / P");
+
+const labelESP=createWorldLabel("ESP32 / GPIO 27");
+const labelDB=createWorldLabel("DATABASE / HISTORICAL DATA");
+const labelML=createWorldLabel("MACHINE LEARNING / FUTURE");
+
+/* =========================================================
+   ESP32 BOARD
+========================================================= */
+
+const esp=new THREE.Group();
+
+const board=new THREE.Mesh(
+  new THREE.BoxGeometry(3.6,.16,2.1),
+  mat.board
+);
+
+board.castShadow=true;
+
+esp.add(board);
+
+const usb=new THREE.Mesh(
+  new THREE.BoxGeometry(.45,.22,.55),
+  mat.copper
+);
+
+usb.position.set(
+  1.85,
+  .12,
+  0
+);
+
+esp.add(usb);
+
+/* Header pins */
+
+for(let x=-1.4;x<=1.4;x+=.35){
+
+  for(let z=-.75;z<=.75;z+=.35){
+
+    const pin=new THREE.Mesh(
+      new THREE.BoxGeometry(.045,.08,.045),
+      mat.copper
+    );
+
+    pin.position.set(
+      x,
+      .12,
+      z
+    );
+
+    esp.add(pin);
+  }
+}
+
+esp.position.set(
+  0,
+  3.0,
+  -3.0
+);
+
+scene.add(esp);
+
+/* =========================================================
+   DATA STREAM
+========================================================= */
+
+const particles=[];
+
+const particleGeo=
+  new THREE.SphereGeometry(.045,8,8);
+
+const particleMat=
+  new THREE.MeshBasicMaterial({
+    color:"#0a7a4b"
+  });
+
+for(let i=0;i<150;i++){
+
+  const p=new THREE.Mesh(
+    particleGeo,
+    particleMat
+  );
+
+  p.userData.offset=Math.random();
+
+  particles.push(p);
+
+  scene.add(p);
+}
+
+/* =========================================================
+   DATABASE
+========================================================= */
+
+const db=new THREE.Group();
+
+for(let i=0;i<5;i++){
+
+  const cylinder=new THREE.Mesh(
+    new THREE.CylinderGeometry(
+      2.0,
+      2.0,
+      .38,
+      48
+    ),
+    new THREE.MeshStandardMaterial({
+      color:"#d9e2dd",
+      roughness:.35,
+      metalness:.25
+    })
+  );
+
+  cylinder.position.y=i*.5;
+
+  db.add(cylinder);
+}
+
+db.position.set(
+  0,
+  2.5,
+  8
+);
+
+scene.add(db);
+
+/* =========================================================
+   DATABASE LINES
+========================================================= */
+
+const dbLineMat=new THREE.LineBasicMaterial({
+  color:0x0a7a4b,
+  transparent:true,
+  opacity:.45
+});
+
+const dbPoints=[
+  new THREE.Vector3(0,3.4,0),
+  new THREE.Vector3(0,3,8)
+];
+
+const dbLine=new THREE.Line(
+  new THREE.BufferGeometry()
+    .setFromPoints(dbPoints),
+  dbLineMat
+);
+
+scene.add(dbLine);
+
+/* =========================================================
+   MACHINE LEARNING NETWORK
+========================================================= */
+
+const ml=new THREE.Group();
+
+const nodes=[];
+
+for(let layer=0;layer<4;layer++){
+
+  const count=layer===0 ? 5 : 4;
+
+  for(let i=0;i<count;i++){
+
+    const node=new THREE.Mesh(
+      new THREE.SphereGeometry(.13,16,16),
+      mat.green
+    );
+
+    node.position.set(
+      (layer-1.5)*2.1,
+      2.5+(i-(count-1)/2)*1.15,
+      21
+    );
+
+    ml.add(node);
+
+    nodes.push({
+      mesh:node,
+      layer
+    });
+  }
+}
+
+/* network connections */
+
+for(const a of nodes){
+
+  for(const b of nodes){
+
+    if(b.layer===a.layer+1){
+
+      const line=new THREE.Line(
+        new THREE.BufferGeometry()
+          .setFromPoints([
+            a.mesh.position,
+            b.mesh.position
+          ]),
+        new THREE.LineBasicMaterial({
+          color:0x8eaaa0,
+          transparent:true,
+          opacity:.22
+        })
+      );
+
+      ml.add(line);
+    }
+  }
+}
+
+scene.add(ml);
+
+/* =========================================================
+   DIAGNOSIS RINGS
+========================================================= */
+
+const diagnosis=new THREE.Group();
+
+for(let i=0;i<4;i++){
+
+  const ring=new THREE.Mesh(
+    new THREE.TorusGeometry(
+      1.5+i*.55,
+      .035,
+      8,
+      80
+    ),
+    new THREE.MeshStandardMaterial({
+      color:i===0 ? "#0a7a4b" : "#6d8c7e",
+      roughness:.35,
+      metalness:.1
+    })
+  );
+
+  ring.rotation.x=Math.PI/2;
+
+  ring.position.y=1.1+i*.35;
+
+  diagnosis.add(ring);
+}
+
+diagnosis.position.set(
+  0,
+  0,
+  32
+);
+
+scene.add(diagnosis);
+
+/* =========================================================
+   INDUSTRIAL PV FIELD
+========================================================= */
+
+const industrial=new THREE.Group();
+
+for(let x=0;x<6;x++){
+
+  for(let z=0;z<8;z++){
+
+    const p=createPanel();
+
+    p.scale.setScalar(.72);
+
+    p.position.set(
+      (x-2.5)*4.3,
+      .85,
+      z*3.5
+    );
+
+    p.rotation.x=-.16;
+
+    industrial.add(p);
+  }
+}
+
+industrial.position.z=49;
+
+scene.add(industrial);
+
+/* =========================================================
+   CAMERA PATH
+========================================================= */
+
+let target=0;
+let current=0;
+
+function clamp(v,min,max){
+
+  return Math.max(
+    min,
+    Math.min(max,v)
+  );
+}
+
+function smoothstep(t){
+
+  return t*t*(3-2*t);
+}
+
+function getCamera(t){
+
+  t=clamp(t,0,1);
+
+  const s=smoothstep(t);
+
+  let z;
+  let x;
+  let y;
+
+  /*
+    SAME CAMERA JOURNEY
+  */
+
+  if(s<.16){
+
+    const q=s/.16;
+
+    z=38-46*q;
+    x=0;
+    y=7+1*q;
+
+  }else if(s<.31){
+
+    const q=(s-.16)/.15;
+
+    z=-8-(-3+8)*q;
+    x=2.8*Math.sin(q*Math.PI);
+    y=6;
+
+  }else if(s<.47){
+
+    const q=(s-.31)/.16;
+
+    z=-3+11*q;
+    x=2.2*Math.sin(q*Math.PI);
+    y=5.3-1*q;
+
+  }else if(s<.64){
+
+    const q=(s-.47)/.17;
+
+    z=8+13*q;
+    x=-1.8*Math.sin(q*Math.PI);
+    y=4.4;
+
+  }else if(s<.78){
+
+    const q=(s-.64)/.14;
+
+    z=21+11*q;
+    x=1.5*Math.sin(q*Math.PI);
+    y=4.5;
+
+  }else{
+
+    const q=(s-.78)/.22;
+
+    z=32+17*q;
+    x=-2*Math.sin(q*Math.PI);
+    y=6+1.2*q;
+  }
+
+  return {x,y,z};
+}
+
+function getLookAt(t){
+
+  const s=smoothstep(
+    clamp(t,0,1)
+  );
+
+  if(s<.16){
+
+    return new THREE.Vector3(
+      0,
+      1,
+      -12
+    );
+
+  }else if(s<.31){
+
+    return new THREE.Vector3(
+      0,
+      4,
+      -7
+    );
+
+  }else if(s<.47){
+
+    return new THREE.Vector3(
+      0,
+      3,
+      4
+    );
+
+  }else if(s<.64){
+
+    return new THREE.Vector3(
+      0,
+      2.5,
+      13
+    );
+
+  }else if(s<.78){
+
+    return new THREE.Vector3(
+      0,
+      2.5,
+      25
+    );
+
+  }else{
+
+    return new THREE.Vector3(
+      0,
+      2,
+      49
+    );
+  }
+}
+
+/* =========================================================
+   UI SECTIONS
+========================================================= */
+
+const sections=[];
+
+for(let i=1;i<=11;i++){
+
+  sections.push(
+    document.getElementById("s"+i)
+  );
+}
+
+const chapterSpans=
+  [...document.querySelectorAll("#chapter span")];
+
+/* =========================================================
+   UPDATE UI
+========================================================= */
+
+function updateUI(t){
+
+  const ranges=[
+    [0,.09],
+    [.09,.18],
+    [.18,.27],
+    [.27,.39],
+    [.39,.49],
+    [.49,.59],
+    [.59,.68],
+    [.68,.77],
+    [.77,.85],
+    [.85,.93],
+    [.93,1.01]
+  ];
+
+  let active=0;
+
+  ranges.forEach((r,i)=>{
+
+    const visible=
+      t>=r[0] &&
+      t<r[1];
+
+    sections[i].classList.toggle(
+      "visible",
+      visible
+    );
+
+    if(visible){
+      active=i;
+    }
+  });
+
+  chapterSpans.forEach(
+    (span,i)=>{
+      span.classList.toggle(
+        "active",
+        i===active
+      );
+    }
+  );
+}
+
+/* =========================================================
+   PROJECT STATE SIMULATION
+========================================================= */
+
+const serialTemp=
+  document.getElementById("serialTemp");
+
+const serialStatus=
+  document.getElementById("serialStatus");
+
+const serialDiagnosis=
+  document.getElementById("serialDiagnosis");
+
+function updatePrototype(){
+
+  const time=
+    performance.now()/1000;
+
+  /*
+    Deliberately keeps the current prototype realistic,
+    but occasionally demonstrates its three diagnostic states.
+  */
+
+  const cycle=
+    (Math.sin(time*.32)+1)/2;
+
+  let temp=
+    34.5 + cycle*6.8;
+
+  temp=
+    Math.round(temp*10)/10;
+
+  serialTemp.textContent=
+    temp.toFixed(1)+" °C";
+
+  if(temp<38){
+
+    serialStatus.textContent="NORMAL";
+    serialStatus.className="ok";
+
+    serialDiagnosis.textContent=
+      "NORMAL TEMPERATURE";
+
+    serialDiagnosis.className="ok";
+
+  }else if(temp<40.5){
+
+    serialStatus.textContent="WARM";
+    serialStatus.className="warn";
+
+    serialDiagnosis.textContent=
+      "WARM TEMPERATURE";
+
+    serialDiagnosis.className="warn";
+
+  }else{
+
+    serialStatus.textContent="HIGH TEMPERATURE";
+    serialStatus.className="danger";
+
+    serialDiagnosis.textContent=
+      "HIGH TEMPERATURE";
+
+    serialDiagnosis.className="danger";
+  }
+}
+
+/* =========================================================
+   DATA PARTICLE PATH
+========================================================= */
+
+function updateParticles(time){
+
+  particles.forEach((p,i)=>{
+
+    const offset=
+      (time*.08+p.userData.offset)%1;
+
+    /*
+      Sensor region
+      →
+      ESP32
+      →
+      database
+    */
+
+    let a,b;
+
+    if(offset<.5){
+
+      const q=offset/.5;
+
+      a=new THREE.Vector3(
+        -1.8 + (i%3)*1.8,
+        4.7,
+        -8
+      );
+
+      b=new THREE.Vector3(
+        0,
+        3,
+        -3
+      );
+
+      p.position.lerpVectors(
+        a,
+        b,
+        q
+      );
+
+    }else{
+
+      const q=(offset-.5)/.5;
+
+      a=new THREE.Vector3(
+        0,
+        3,
+        -3
+      );
+
+      b=new THREE.Vector3(
+        0,
+        3,
+        8
+      );
+
+      p.position.lerpVectors(
+        a,
+        b,
+        q
+      );
+    }
+  });
+}
+
+/* =========================================================
+   WORLD LABEL POSITIONING
+========================================================= */
+
+const tempPos=new THREE.Vector3();
+const irrPos=new THREE.Vector3();
+const elecPos=new THREE.Vector3();
+const espPos=new THREE.Vector3();
+const dbPos=new THREE.Vector3();
+const mlPos=new THREE.Vector3();
+
+function projectLabel(
+  el,
+  object,
+  ox,
+  oy
+){
+
+  object.getWorldPosition(tempPos);
+
+  tempPos.project(camera);
+
+  const x=
+    (tempPos.x*.5+.5)*
+    window.innerWidth;
+
+  const y=
+    (-tempPos.y*.5+.5)*
+    window.innerHeight;
+
+  el.style.transform=
+    `translate(${x+ox}px,${y+oy}px)`;
+}
+
+function updateLabels(){
+
+  projectLabel(
+    labelTemp,
+    tempSensor,
+    -75,
+    -38
+  );
+
+  projectLabel(
+    labelIrr,
+    irradianceSensor,
+    -45,
+    -50
+  );
+
+  projectLabel(
+    labelElec,
+    electricalSensor,
+    15,
+    -38
+  );
+
+  projectLabel(
+    labelESP,
+    esp,
+    35,
+    -15
+  );
+
+  projectLabel(
+    labelDB,
+    db,
+    30,
+    -20
+  );
+
+  projectLabel(
+    labelML,
+    ml,
+    30,
+    -20
+  );
+}
+
+/* =========================================================
+   HIGH CONTRAST DETECTION
+========================================================= */
+
+function updateContrast(){
+
+  /*
+    We intentionally use scene regions rather than
+    attempting expensive per-pixel luminance detection.
+
+    The text surfaces remain light and readable while
+    dark technical surfaces receive stronger shadows.
+  */
+
+  const pos=getCamera(current);
+
+  const darkRegion=
+    pos.z>-12 &&
+    pos.z<2;
+
+  document.body.classList.toggle(
+    "high-contrast",
+    darkRegion
+  );
+
+  /*
+    Floating labels remain readable over the
+    PV / ESP32 surfaces.
+  */
+
+  const labels=[
+    labelTemp,
+    labelIrr,
+    labelElec,
+    labelESP,
+    labelDB,
+    labelML
+  ];
+
+  labels.forEach(label=>{
+    label.classList.toggle(
+      "dark-surface",
+      darkRegion
+    );
+  });
+}
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+window.addEventListener(
+  "wheel",
+  e=>{
+
+    e.preventDefault();
+
+    target+=
+      e.deltaY*.00055;
+
+    target=
+      clamp(target,0,1);
+
+  },
+  {passive:false}
+);
+
+window.addEventListener(
+  "touchstart",
+  e=>{
+    window._touchY=e.touches[0].clientY;
+  },
+  {passive:true}
+);
+
+window.addEventListener(
+  "touchmove",
+  e=>{
+
+    const y=e.touches[0].clientY;
+
+    const delta=
+      window._touchY-y;
+
+    target+=
+      delta*.0011;
+
+    target=
+      clamp(target,0,1);
+
+    window._touchY=y;
+
+  },
+  {passive:true}
+);
+
+window.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      e.key==="ArrowDown" ||
+      e.key==="PageDown"
+    ){
+
+      target=
+        clamp(
+          target+.035,
+          0,
+          1
+        );
+    }
+
+    if(
+      e.key==="ArrowUp" ||
+      e.key==="PageUp"
+    ){
+
+      target=
+        clamp(
+          target-.035,
+          0,
+          1
+        );
+    }
+  }
+);
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+window.addEventListener(
+  "resize",
+  ()=>{
+
+    camera.aspect=
+      window.innerWidth/
+      window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
+  }
+);
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+const clock=new THREE.Clock();
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  const time=
+    clock.getElapsedTime();
+
+  current+=
+    (target-current)*.055;
+
+  const cp=
+    getCamera(current);
+
+  camera.position.x=
+    cp.x;
+
+  camera.position.y=
+    cp.y;
+
+  camera.position.z=
+    cp.z;
+
+  const look=
+    getLookAt(current);
+
+  camera.lookAt(look);
+
+  /* Subtle physical movement */
+
+  tempSensor.position.y=
+    4.65+
+    Math.sin(time*1.3)*.025;
+
+  irradianceSensor.position.y=
+    4.72+
+    Math.sin(time*1.1+1)*.025;
+
+  electricalSensor.position.y=
+    4.65+
+    Math.sin(time*1.25+2)*.025;
+
+  /* Database rotation */
+
+  db.rotation.y=
+    Math.sin(time*.12)*.08;
+
+  /* ML network subtle movement */
+
+  ml.rotation.y=
+    Math.sin(time*.15)*.035;
+
+  /* Diagnosis rings */
+
+  diagnosis.rotation.z=
+    time*.12;
+
+  diagnosis.children.forEach(
+    (ring,i)=>{
+
+      ring.rotation.z=
+        time*(.08+i*.015);
+    }
+  );
+
+  updateParticles(time);
+
+  updatePrototype();
+
+  updateUI(current);
+
+  updateLabels();
+
+  updateContrast();
+
+  renderer.render(
+    scene,
+    camera
+  );
+}
+
+animate();
+
+</script>
+
+</body>
+</html>
+```
